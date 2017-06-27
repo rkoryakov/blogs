@@ -11,6 +11,6 @@ We have created a record pool in the Logger and we worked out a mechanism for tr
 <p>
 <img src="https://github.com/rkoryakov/blogs/blob/master/doc/user_theads.PNG">
 <p>
-And every Logger has its own background thread that flushes the pool periodicaly.
+This approach lets us to flush the record pool periodically sending records to registered Handlers. Every Logger has its own background thread that flushes the pool periodically.
 <p>
 <img src="https://github.com/rkoryakov/blogs/blob/master/doc/Flushes.PNG">

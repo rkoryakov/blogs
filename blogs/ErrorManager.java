@@ -57,14 +57,14 @@ public class ErrorManager {
 	 * @param code
 	 *            an error code defined in ErrorManager
 	 */
-	public synchronized void error(String msg, Exception ex, int code) {
+	public void error(String msg, Exception ex, int code) {
 		if (reported) {
 			// We only report the first error, to avoid clogging
 			// the screen.
 			return;
 		}
 		reported = true;
-		String text = "blogs.ErrorManager: " + code;
+		String text = "ru.gazprom_neft.logging.ErrorManager: " + code;
 		if (msg != null) {
 			text = text + ": " + msg;
 		}

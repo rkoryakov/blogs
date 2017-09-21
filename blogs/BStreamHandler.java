@@ -64,7 +64,7 @@ public class BStreamHandler extends BHandler {
 			} catch (UnsupportedEncodingException ex) {
 				// This shouldn't happen. The setEncoding method
 				// should have validated that the encoding is OK.
-				throw new Error("Unexpected exception " + ex);
+				getErrorManager().error("Unexpected exception " + ex.getMessage(), ex, ErrorManager.GENERIC_FAILURE);
 			}
 		}
 	}
@@ -120,7 +120,7 @@ public class BStreamHandler extends BHandler {
 		} catch (Exception ex) {
 			// We don't want to throw an exception here, but we
 			// report the exception to any registered ErrorManager.
-			System.err.println(ex.getMessage());
+			getErrorManager().error(ex.getMessage(), ex, ErrorManager.FORMAT_FAILURE);
 			return;
 		}
 
@@ -129,7 +129,7 @@ public class BStreamHandler extends BHandler {
 		} catch (Exception ex) {
 			// We don't want to throw an exception here, but we
 			// report the exception to any registered ErrorManager.
-			System.err.println(ex.getMessage());
+			getErrorManager().error(ex.getMessage(), ex, ErrorManager.WRITE_FAILURE);
 		}
 	}
 
@@ -143,7 +143,7 @@ public class BStreamHandler extends BHandler {
 			} catch (Exception ex) {
 				// We don't want to throw an exception here, but we
 				// report the exception to any registered ErrorManager.
-				System.err.println(ex.getMessage());
+				getErrorManager().error(ex.getMessage(), ex, ErrorManager.WRITE_FAILURE);
 			}
 		}
 	}
@@ -156,7 +156,7 @@ public class BStreamHandler extends BHandler {
 			} catch (Exception ex) {
 				// We don't want to throw an exception here, but we
 				// report the exception to any registered ErrorManager.
-				System.err.println(ex.getMessage());
+				getErrorManager().error(ex.getMessage(), ex, ErrorManager.WRITE_FAILURE);
 			}
 			writer = null;
 			output = null;

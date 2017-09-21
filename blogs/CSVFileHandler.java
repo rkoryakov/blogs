@@ -1,9 +1,12 @@
 package blogs;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * Simple CSV file logging {@code CSVFileHandler}.
@@ -33,11 +36,13 @@ public class CSVFileHandler extends BStreamHandler {
 	private MeteredStream meter;
 	private int limit; 
 	private String pattern;
-
+	private int maxDays;
+	private String timeZone;
+	
 	public static final int DEFAULT_FILE_SIZE = 30000000; // 30 Mb
 	public static final String DEFAULT_CSV_FILE_NAME_PATTREN = "./" + BSolution.ALL.getPath() + "_%t%i.csv";
 	public static final String DEFAULT_ENCODING = "utf-8";
-	
+	public static final int DEFAULT_MAX_DAYS = 90;
 	// A metered stream is a subclass of OutputStream that
 	// (a) forwards all its output to a target stream
 	// (b) keeps track of how many bytes have been written
@@ -74,10 +79,17 @@ public class CSVFileHandler extends BStreamHandler {
 		}
 	}
 
+	/**
+	 * Open an existing file or create a new file. A new file will be created if there are 
+	 * no files with current date or file size is more than this.limit
+	 * @param pattern
+	 * @throws IOException
+	 */
 	private void open(String pattern) throws IOException {
 		int len = 0;
 		int g = 0;
 		File fname = null;
+		removeOldest();
 		
 		while (true) {
 			g ++;
@@ -93,6 +105,40 @@ public class CSVFileHandler extends BStreamHandler {
 		setOutputStream(meter);
 	}
 
+	/**
+	 * Remove the oldest file. which create date is more than this.maxDays
+	 */
+	private void removeOldest() {
+		final Calendar calendar  = Calendar.getInstance();
+		calendar.setTimeZone(TimeZone.getTimeZone(timeZone));
+		calendar.add(Calendar.DAY_OF_MONTH, -maxDays);
+		
+		FileFilter filter = new FileFilter() {
+			@Override
+			public boolean accept(File pathname) {
+				if (pathname.isFile()) {
+					if (pathname.lastModified() < calendar.getTimeInMillis() && pathname.getName().endsWith(".csv")) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+		
+		File toGetSolDir = generateFileName(this.pattern, 1);
+		if (toGetSolDir != null) {
+			File solDir = toGetSolDir.getParentFile();
+			File[] files = solDir.listFiles(filter);
+			if (files != null) {
+				for (File file : files) {
+					file.delete();
+				}
+			}
+		} else {
+			getErrorManager().error("can't resolve the pattern " + this.pattern, null, ErrorManager.GENERIC_FAILURE);
+		}
+	}
+	
 	/**
 	 * Generate file name from the given pattern.
 	 * <p>It's improved version of FileHandler's generate() method.
@@ -117,7 +163,7 @@ public class CSVFileHandler extends BStreamHandler {
 				} else {
 					fname = new File(pathPart.toString());
 				}
-				pathPart.replace(0, pathPart.length(), "");
+				pathPart.delete(0, pathPart.length());
 			} else
 			if (ch == '%' && i < pattern.length() - 1) {
 				char ch2 = pattern.charAt(i + 1);
@@ -125,22 +171,18 @@ public class CSVFileHandler extends BStreamHandler {
 				case 'd':
 					String dir = manager.getProperty(BLogManager.BLOGS_DIR_PROP, manager.getDefaultBaseDir());
 					fname = new File(dir);
-					pathPart.replace(0, pathPart.length(), "");
-					i ++;
+					pathPart.delete(0, pathPart.length());
 					break;
 				case 't':
 					CSVFormatter formatter = (CSVFormatter)getFormatter();
 					String date = formatter.getDateString();
 					pathPart.append(date);
-					i ++;
 					break;
 				case 'i':
 					pathPart.append("_part").append(number);
-					i ++;
 					break;
-				default:
-					i ++;
 				}
+				i ++;
 			} else {
 				pathPart.append(ch);
 			}
@@ -159,14 +201,17 @@ public class CSVFileHandler extends BStreamHandler {
 	 */
 	private void configure() {
 		BLogManager manager = BLogManager.getLogManager();
-		setFormatter(new CSVFormatter());
+		CSVFormatter formatter = new CSVFormatter();
+		timeZone = manager.getProperty(BLogManager.TIMEZONE_PROP, "GMT");
+		formatter.setTimeZone(timeZone);
+		setFormatter(formatter);
 		limit = manager.getProperty(BLogManager.CSV_MAX_FILE_SIZE_PROP, DEFAULT_FILE_SIZE);
 		pattern = manager.getProperty(BLogManager.CSV_FILE_NAME_PATTREN_PROP, DEFAULT_CSV_FILE_NAME_PATTREN);
+		maxDays = manager.getProperty(BLogManager.CSV_MAX_DAYS, DEFAULT_MAX_DAYS);
 		try {
 			setEncoding(manager.getProperty(BLogManager.CSV_ENCODING_PROP, DEFAULT_ENCODING));
 		} catch (Exception ex2) {
 			// doing a setEncoding with null should always work.
-			// assert false;
 		}
 	}
 
@@ -292,7 +337,7 @@ public class CSVFileHandler extends BStreamHandler {
 			try {
 				open(pattern);
 			} catch (IOException e) {
-				System.err.println(e.getMessage());
+				getErrorManager().error(e.getMessage(), e, ErrorManager.WRITE_FAILURE);
 			}
 		}
 	}

@@ -13,8 +13,10 @@ public abstract class BHandler {
 	//private Filter filter;
 	private BFormatter formatter;
 	private String encoding;
-
+	private ErrorManager errorManager;
+	
 	protected BHandler() {
+		this.errorManager = new ErrorManager();
 	}
 
 	/**
@@ -110,26 +112,7 @@ public abstract class BHandler {
 		return encoding;
 	}
 
-	/**
-	 * Set a <tt>Filter</tt> to control output on this <tt>Handler</tt>.
-	 * <P>
-	 * For each call of <tt>publish</tt> the <tt>Handler</tt> will call this
-	 * <tt>Filter</tt> (if it is non-null) to check if the <tt>LogRecord</tt>
-	 * should be published or discarded.
-	 * 
-	 * @param newFilter
-	 *            a <tt>Filter</tt> object (may be null)
-	 */
-//	public void setFilter(Filter newFilter) throws SecurityException {
-//		filter = newFilter;
-//	}
-
-	/**
-	 * Get the current <tt>Filter</tt> for this <tt>Handler</tt>.
-	 * 
-	 * @return a <tt>Filter</tt> object (may be null)
-	 */
-//	public Filter getFilter() {
-//		return filter;
-//	}
+	public ErrorManager getErrorManager() {
+		return this.errorManager;
+	}
 }

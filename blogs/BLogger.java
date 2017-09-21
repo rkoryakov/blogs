@@ -30,7 +30,7 @@ public class BLogger {
 	//flush period
 	protected int flushPeriod; 
 	// default flush period in milliseconds
-	protected static final int DEFAULT_FLUSHPERIOD = 4000; // 5 seconds
+	protected static final int DEFAULT_FLUSHPERIOD = 5000; // 5 seconds
 	// logger lifetime
 	protected int lifetime;
 	// default logger lifetime during which there are no records in the pool (milliseconds)

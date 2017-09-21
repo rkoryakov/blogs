@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class BLogManager {
 	// The global BLogManager object
-	protected static BLogManager manager = new BLogManager();
+	protected static final BLogManager manager = new BLogManager();
 	// Table of known loggers.  Maps names to BLoggers.
 	protected ConcurrentMap<String, WeakReference<BLogger>> loggers = new ConcurrentHashMap<String, WeakReference<BLogger>>();
 	protected Properties props = new Properties();
@@ -31,7 +31,8 @@ public class BLogManager {
 	public static final String MAX_POOL_SIZE_PROP = "blogger.pool.size";
     public static final String CSV_ENCODING_PROP = "csvfilehandler.encoding";
 	public static final String DEFAULT_BLOGS_DIR = "/usr/sap/<SID>/J00/log/MTO";
-	
+	public static final String TIMEZONE_PROP = "blogger.timezone";
+	public static final String CSV_MAX_DAYS = "csvfilehandler.maxdays";
     /**
      * This constructor adds shutdown hook thread to safety finish all the 
      * BLoger instances when JVM shuts down normally or abruptly.
@@ -167,8 +168,8 @@ public class BLogManager {
      * @throws IOException
      */
     public void readConfiguration() throws IOException {
-    	String cfgPath = System.getProperty(BLOGS_DIR_PROP, getDefaultBaseDir() + File.separatorChar  + "cfg.properties");
-    	File f = new File(cfgPath);
+    	String cfgPath = System.getProperty(BLOGS_DIR_PROP, getDefaultBaseDir());
+    	File f = new File(cfgPath + File.separatorChar  + "cfg.properties");
 		cfgPath = f.getCanonicalPath();
 		if (f.exists()) {
 			InputStream in = new FileInputStream(cfgPath);

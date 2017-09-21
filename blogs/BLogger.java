@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * convenient format. 
  * <p>
  * Every instance of <tt>BLogger</tt> class has its own local cache 
- * to hold <tt>BLogRecord</tt>s and writes them down into its handlers periodically. Only one
+ * to hold <tt>BLogRecord</tt>s and writes these records down into its handlers periodically. Only one
  * instance of {@code BLogger} <strong>with a specified</strong> {@code loggerName} can be created.
  * Thus only one thread can publish this pool records. But several threads are able to invoke 
  * {@code getLogger()} method simultaneously. If there are no records in the 
